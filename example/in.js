@@ -14,7 +14,7 @@ async function main(){
     std.callback_test().then(x => {
         std.print(x)
     })
-    let f = std.callback_test();
+    f = std.callback_test();
     
     std.println("Calling")
     std.callback_test().then(r => std.println(r))

@@ -13,18 +13,7 @@ fn core_print(
     }
     return acc.join(" ");
 }
-pub fn format(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,mut ret: v8::ReturnValue,){
-    let formatted = core_print(scope, &args);
 
-    let ret_val = v8::String::new(scope, &format!("{}", formatted)).unwrap();
-    ret.set(ret_val.into())
-}
-pub fn formatln(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,mut ret: v8::ReturnValue,){
-    let formatted = core_print(scope, &args);
-
-    let ret_val = v8::String::new(scope, &format!("{}\n", formatted)).unwrap();
-    ret.set(ret_val.into())
-}
 pub fn print(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,) {
 
     let formatted = core_print(scope, &args);
@@ -36,15 +25,7 @@ pub fn println(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_
     print!("{}\n", formatted);
 
 }
-pub fn err(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
-    let formatted = core_print(scope, &args);
-    
-    print!("{}", Red.paint(formatted));
-}
-pub fn errln(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
-    let formatted = core_print(scope, &args);
-    print!("{}\n", Red.paint(formatted));
-}
+
 pub fn assert(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
     if args.get(0) == v8::Boolean::new(scope, false){
         if args.length() >= 2{ //Todo, find out why this needs to be 2.
@@ -54,12 +35,12 @@ pub fn assert(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_r
         }
     }
 }
-pub fn callback_test(scope: &mut v8::HandleScope, _args: v8::FunctionCallbackArguments,mut ret:  v8::ReturnValue,){
-    let resolver = v8::PromiseResolver::new(scope).unwrap();
-    let promise = resolver.get_promise(scope);
-    let value = v8::String::new(scope, "From promise").unwrap();
-    resolver.resolve(scope, value.into()).unwrap();
-    ret.set(promise.into());
+// pub fn callback_test(scope: &mut v8::HandleScope, _args: v8::FunctionCallbackArguments,mut ret:  v8::ReturnValue,){
+//     let resolver = v8::PromiseResolver::new(scope).unwrap();
+//     let promise = resolver.get_promise(scope);
+//     let value = v8::String::new(scope, "From promise").unwrap();
+//     resolver.resolve(scope, value.into()).unwrap();
+//     ret.set(promise.into());
 
-    // println!("{}", args.data().unwrap().fu);
-}
+//     // println!("{}", args.data().unwrap().fu);
+// }
