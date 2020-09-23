@@ -40,7 +40,7 @@ fn main() {
     // Set global `std` to refer to our object that has print objects
     global.set(scope,k , std_obj.into());
 
-    let code_input = std::fs::read("in.js").unwrap();
+    let code_input = std::fs::read("example/in.js").unwrap();
     let code = v8::String::new(scope, &String::from_utf8(code_input).unwrap()).unwrap();
     // println!("javascript code: {}", code.to_rust_string_lossy(scope));
 
