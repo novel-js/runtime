@@ -21,9 +21,5 @@ pub fn read(scope: &mut v8::HandleScope, args: v8::FunctionCallbackArguments,mut
             resolver.reject(scope, msg.into());
         }
     }
-    println!("Uhh0 ");
-    
-    // let value = v8::String::new(scope, "From promise").unwrap();
-    // resolver.resolve(scope, value.into()).unwrap();
     ret.set(promise.into());
 }
