@@ -1,7 +1,7 @@
 use rusty_v8 as v8;
 
 mod kstd;
-
+mod kfs;
 fn main() {
     let platform = v8::new_default_platform().unwrap();
     v8::V8::initialize_platform(platform);
@@ -32,6 +32,10 @@ fn main() {
     funcs.push((
         v8::String::new(scope, "assert").unwrap(),
         v8::Function::new(scope, kstd::assert).unwrap(),
+    ));
+    funcs.push((
+        v8::String::new(scope, "read").unwrap(),
+        v8::Function::new(scope, kfs::read).unwrap(),
     ));
 
     // funcs.push((
