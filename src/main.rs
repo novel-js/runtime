@@ -74,7 +74,9 @@ fn main() {
             
             let result = script.run(scope).unwrap();
             let result = result.to_string(scope).unwrap();
-            // println!("result: {}", result.to_rust_string_lossy(scope));
+            if result.length() != 0{
+                println!("result: {}", result.to_rust_string_lossy(scope));
+            }
         }
         None => panic!("Compilation failed"),
     }

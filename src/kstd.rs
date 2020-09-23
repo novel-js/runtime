@@ -1,7 +1,5 @@
 use rusty_v8 as v8;
-use v8::MapFnTo;
 use ansi_term::Colour::Red;
-use std::thread;
 //TODO: Make this support configs.
 fn core_print(
     scope: &mut v8::HandleScope,
@@ -56,12 +54,10 @@ pub fn assert(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_r
         }
     }
 }
-pub fn callback_test(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,mut ret:  v8::ReturnValue,){
-    let context = scope.get_current_context();
+pub fn callback_test(scope: &mut v8::HandleScope, _args: v8::FunctionCallbackArguments,mut ret:  v8::ReturnValue,){
     let resolver = v8::PromiseResolver::new(scope).unwrap();
     let promise = resolver.get_promise(scope);
     let value = v8::String::new(scope, "From promise").unwrap();
-    std::thread::sleep_ms(2000);
     resolver.resolve(scope, value.into()).unwrap();
     ret.set(promise.into());
 
