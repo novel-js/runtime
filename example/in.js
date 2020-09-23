@@ -1,8 +1,7 @@
-async function a(){
-    
-}
-
+// let x = require('')
+import x from 'example/in2.js'
 function main(){
+    std.print(x)
     // let x = 5;
     // let y = 9;
     // std.assert(x == y, "ABC");
@@ -19,12 +18,12 @@ function main(){
     // std.println("Calling")
     // std.callback_test().then(r => std.println(r))
     // std.println("Called")
-
-    std.read("test.txt").then(e => {
-        std.println("Successful: ", e);
-    }).catch(e => {
-        std.println("Error: ", e)
-    })
+    // std.print(x)
+    // std.read("test.txt").then(e => {
+    //     std.println("Successful: ", e);
+    // }).catch(e => {
+    //     std.println("Error: ", e)
+    // })
     // std.print(x)
 }
 main();
