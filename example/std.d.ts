@@ -5,4 +5,7 @@ declare namespace std{
     function err(...args: Any[]): null;
     function errln(...args: Any[]): null;
     function format(...args: Any[]): String;
+    function formatln(...args: Any[]): String;
+    function callback_test(): Promise<String>;
+
 }

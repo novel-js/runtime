@@ -47,7 +47,11 @@ fn main() {
     ));
     funcs.push((
         v8::String::new(scope, "formatln").unwrap(),
-        v8::Function::new(scope, kstd::format).unwrap(),
+        v8::Function::new(scope, kstd::formatln).unwrap(),
+    ));
+    funcs.push((
+        v8::String::new(scope, "callback_test").unwrap(),
+        v8::Function::new(scope, kstd::callback_test).unwrap(),
     ));
 
     let global_std_obj = v8::Object::new(scope);
