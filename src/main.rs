@@ -33,6 +33,22 @@ fn main() {
         v8::String::new(scope, "assert").unwrap(),
         v8::Function::new(scope, kstd::assert).unwrap(),
     ));
+    funcs.push((
+        v8::String::new(scope, "err").unwrap(),
+        v8::Function::new(scope, kstd::err).unwrap(),
+    ));
+    funcs.push((
+        v8::String::new(scope, "errln").unwrap(),
+        v8::Function::new(scope, kstd::errln).unwrap(),
+    ));
+    funcs.push((
+        v8::String::new(scope, "format").unwrap(),
+        v8::Function::new(scope, kstd::format).unwrap(),
+    ));
+    funcs.push((
+        v8::String::new(scope, "formatln").unwrap(),
+        v8::Function::new(scope, kstd::format).unwrap(),
+    ));
 
     let global_std_obj = v8::Object::new(scope);
     for funcs in funcs {
