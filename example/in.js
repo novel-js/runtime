@@ -1,7 +1,8 @@
 // let x = require('')
 import x from 'example/in2.js'
 function main(){
-    std.print(x)
+    std.println(x)
+    std.println(std.fs?.read)
     // let x = 5;
     // let y = 9;
     // std.assert(x == y, "ABC");
