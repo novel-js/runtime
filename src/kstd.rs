@@ -1,5 +1,7 @@
 use rusty_v8 as v8;
 
+
+//TODO: Make this support configs.
 fn core_print(
     scope: &mut v8::HandleScope,
     func_callback_args: &v8::FunctionCallbackArguments,
@@ -27,4 +29,13 @@ pub fn println(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,m
 
     let ret_val = v8::String::new(scope, &format!("{}\n", formatted)).unwrap();
     ret.set(ret_val.into())
+}
+pub fn assert(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,mut ret: v8::ReturnValue,){
+    if args.get(0) == v8::Boolean::new(scope, false){
+        if args.length() >= 2{ //Todo, find out why this needs to be 2.
+            println!("Assertion failed: {}", args.get(1).to_string(scope).unwrap().to_rust_string_lossy(scope))
+        }else{
+            println!("Assertion failed");
+        }
+    }
 }
