@@ -1,10 +1,10 @@
 function main(){
     let x = 5;
     let y = 9;
-    let p = print('Printed',x ,y, x + y, {
-        // sep: "From js\n"
+    let p = std.print('Printed',x ,y, x + y, {
+        // sep: "From js\n"z 
     });
-    print(p);
-    println(p);
+    std.print(Animation)
+    std.println(p);
 }
 main();
