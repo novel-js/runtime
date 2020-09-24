@@ -1,3 +1,5 @@
 // const x = 5;
-export default 
-    "X is str"
+function f(){
+    std.println("Called f")
+}
+export default f

@@ -19,7 +19,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
         v8::Function::new(scope, kstd::assert).unwrap(),
     ));
     funcs.push((
-        v8::String::new(scope, "fs.read").unwrap(),
+        v8::String::new(scope, "read").unwrap(),
         v8::Function::new(scope, kfs::read).unwrap(),
     ));
 
@@ -30,7 +30,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
             .unwrap();
     }
 
-    let k = v8::String::new(scope, "std").unwrap().into();
+    let k = v8::String::new(scope, "$").unwrap().into();
     // Set global `std` to refer to our object that has print objects
     let global = scope.get_current_context().global(scope);
     global.set(scope, k, global_std_obj.into());
@@ -68,9 +68,20 @@ pub fn resolver<'a>(
     _referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
     unsafe{
+        //TODO: Get this actually working. 
+        /* TODO: 
+            Calculate `cwd/specifier`
+            Seems to not be working but shouldn't be that hard to fix
+        */
         let mut scope = &mut v8::CallbackScope::new(context);
-        let code_input = std::fs::read(specifier.to_rust_string_lossy(&mut scope)).unwrap();
         let r = specifier.to_rust_string_lossy(scope);
+        let cwd_s = &std::env::current_dir().unwrap().into_os_string();
+        let cwd = std::path::Path::new(cwd_s);
+
+        let path = cwd.join(std::path::Path::new(&r));
+        println!("path = {}", path.to_string_lossy());
+
+        let code_input = std::fs::read(path).unwrap();
         let module = compile_module(scope, String::from_utf8(code_input).unwrap(), r);
         return Some(module.unwrap())
      
@@ -85,12 +96,20 @@ fn main() {
 
     let isolate = &mut v8::Isolate::new(Default::default());
     // TODO Implement dynamic module imports
-    // isolate.set_host_import_module_dynamically_callback(test);
+    // isolate.set_host_import_module_dynamically_callback(resolver);
     let scope = &mut v8::HandleScope::new(isolate);
 
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
     //TODO: Support different file names
     let code_input = std::fs::read("example/in.js").unwrap();
-    compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into());
+    let module = compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into());
+    match module{
+        Some(m) => {
+
+            // m.
+
+        }
+        None => {}
+    }
 }
