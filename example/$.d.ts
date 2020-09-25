@@ -1,4 +1,4 @@
-declare namespace std{
+declare namespace ${
     function print(...args: any[]);
     function println(...args: any[]);
     // function assert(assertion: boolean, reason: String): null;
@@ -7,5 +7,6 @@ declare namespace std{
     // function format(...args: Any[]): String;
     // function formatln(...args: Any[]): String;
     // function callback_test(): Promise<String>;
-    function read(filename: String): Promise<String>
+    function file_read(filename: String): Promise<String>
 }
+export default $

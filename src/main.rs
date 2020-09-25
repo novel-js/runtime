@@ -1,9 +1,17 @@
 use rusty_v8 as v8;
-use v8::MapFnTo;
+#[macro_use]
+extern crate lazy_static;
 mod kfs;
 mod kstd;
+use isahc::prelude::*;
+use rand::Rng;
+lazy_static!{
+    static ref MODULE_MAP: std::sync::Mutex<std::collections::HashMap<i32, String>> = std::sync::Mutex::new(std::collections::HashMap::new());
+}
+
 pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: String) ->Option<v8::Local<'a, v8::Module>>{
     // Register functions into object
+    println!("Name is {}", name);
     let mut funcs: Vec<(v8::Local<v8::String>, v8::Local<v8::Function>)> = vec![];
 
     funcs.push((
@@ -19,7 +27,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
         v8::Function::new(scope, kstd::assert).unwrap(),
     ));
     funcs.push((
-        v8::String::new(scope, "read").unwrap(),
+        v8::String::new(scope, "file_read").unwrap(),
         v8::Function::new(scope, kfs::read).unwrap(),
     ));
 
@@ -38,7 +46,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     let script_origin_resource_name = v8::String::new(scope, &name).unwrap().into();
     let script_origin_line_offset = v8::Integer::new(scope, 0).into();
     let script_origin_column_offset = v8::Integer::new(scope, 0).into();
-    let script_origin_is_cross_origin = v8::Boolean::new(scope, true).into();
+    let script_origin_is_cross_origin = v8::Boolean::new(scope, false).into();
     let script_origin_script_id = v8::Integer::new(scope, 123);
     let script_origin_sourcemap_url = v8::String::new(scope, "").unwrap().into();
     let script_origin_opaque = v8::Boolean::new(scope, true);
@@ -58,7 +66,8 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     let v8str_code: v8::Local<v8::String> = v8::String::new(scope, &code).unwrap();
     let script_source = v8::script_compiler::Source::new(v8str_code, &script_origin);
     let /* mut*/  module = v8::script_compiler::compile_module(scope, script_source).unwrap();
-    let _im: Option<bool> = module.instantiate_module(scope, resolver);
+    let im = module.instantiate_module(scope, resolver);
+    println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
     let _result = module.evaluate(scope).unwrap();
     return Some(module)
 }
@@ -73,16 +82,25 @@ pub fn resolver<'a>(
             Calculate `cwd/specifier`
             Seems to not be working but shouldn't be that hard to fix
         */
-        let mut scope = &mut v8::CallbackScope::new(context);
+        
+        let scope = &mut v8::CallbackScope::new(context);
         let r = specifier.to_rust_string_lossy(scope);
-        let cwd_s = &std::env::current_dir().unwrap().into_os_string();
-        let cwd = std::path::Path::new(cwd_s);
+        
+        let mut response = isahc::get(r).unwrap();
+        let n = format!("{}.js", rand::random::<u32>().to_string());
 
-        let path = cwd.join(std::path::Path::new(&r));
-        println!("path = {}", path.to_string_lossy());
+        let src = response.text().unwrap();
+        println!("src: {} r: {} n: {}\n", src, specifier.to_rust_string_lossy(scope), n);
+        // let cwd_s = &std::env::current_dir().unwrap().into_os_string();
+        // let cwd = std::path::Path::new(cwd_s);
+        println!("Trying to load {}", specifier.to_rust_string_lossy(scope));
+        // let path = std::path::Path::new(&r);
+        // println!("path = {}", path.to_string_lossy());
 
-        let code_input = std::fs::read(path).unwrap();
-        let module = compile_module(scope, String::from_utf8(code_input).unwrap(), r);
+        // let code_input = std::fs::read(path).unwrap();
+        let module = compile_module(scope, src, n);
+        // MODULE_MAP.lock().unwrap().insert(module.unwrap().get_identity_hash(), std::env::current_dir().unwrap().to_str().unwrap().into());
+
         return Some(module.unwrap())
      
     }
@@ -90,6 +108,7 @@ pub fn resolver<'a>(
 }
 
 fn main() {
+    // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
     let platform = v8::new_default_platform().unwrap();
     v8::V8::initialize_platform(platform);
     v8::V8::initialize();
@@ -103,9 +122,10 @@ fn main() {
     let scope = &mut v8::ContextScope::new(scope, context);
     //TODO: Support different file names
     let code_input = std::fs::read("example/in.js").unwrap();
+    println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
     let module = compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into());
     match module{
-        Some(m) => {
+        Some(_m) => {
 
             // m.
 
