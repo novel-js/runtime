@@ -11,7 +11,7 @@ lazy_static!{
 
 pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: String) ->Option<v8::Local<'a, v8::Module>>{
     // Register functions into object
-    println!("Name is {}", name);
+    // println!("Name is {}", name);
     let mut funcs: Vec<(v8::Local<v8::String>, v8::Local<v8::Function>)> = vec![];
 
     funcs.push((
@@ -67,7 +67,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     let script_source = v8::script_compiler::Source::new(v8str_code, &script_origin);
     let /* mut*/  module = v8::script_compiler::compile_module(scope, script_source).unwrap();
     let im = module.instantiate_module(scope, resolver);
-    println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
+    // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
     let _result = module.evaluate(scope).unwrap();
     return Some(module)
 }
@@ -90,10 +90,10 @@ pub fn resolver<'a>(
         let n = format!("{}.js", rand::random::<u32>().to_string());
 
         let src = response.text().unwrap();
-        println!("src: {} r: {} n: {}\n", src, specifier.to_rust_string_lossy(scope), n);
+        // println!("src: {} r: {} n: {}\n", src, specifier.to_rust_string_lossy(scope), n);
         // let cwd_s = &std::env::current_dir().unwrap().into_os_string();
         // let cwd = std::path::Path::new(cwd_s);
-        println!("Trying to load {}", specifier.to_rust_string_lossy(scope));
+        // println!("Trying to load {}", specifier.to_rust_string_lossy(scope));
         // let path = std::path::Path::new(&r);
         // println!("path = {}", path.to_string_lossy());
 
@@ -122,7 +122,7 @@ fn main() {
     let scope = &mut v8::ContextScope::new(scope, context);
     //TODO: Support different file names
     let code_input = std::fs::read("example/in.js").unwrap();
-    println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
+    // println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
     let module = compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into());
     match module{
         Some(_m) => {
