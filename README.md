@@ -1,3 +1,6 @@
+[![HitCount](http://hits.dwyl.com/pepsi/v8test.svg)](http://hits.dwyl.com/pepsi/v8test)
+![Lines of Code](https://tokei.rs/b1/github/pepsi/v8test?category=code)
+
 `v8test` (Future `key`) is an experiment im doing with rust. Trying to make a small time node/deno "clone".
 If you have any code improvements, or general ideas feel  free to make a pull request/issue respectively.
 
