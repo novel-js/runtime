@@ -116,7 +116,7 @@ pub fn resolver<'a>(
             let src = response.text().unwrap();
             let r = specifier.to_rust_string_lossy(scope);
             // println!("{}", format!(".cache/novel/pkgs/{}", r));
-            let last = r.split("/").last().unwrap();
+            let last = r.split('/').last().unwrap();
             let r_without_last = r.replace(last, "");
             // println!("last =  {} r without lsat = {}", &last, &r_without_last);
             std::fs::create_dir_all(format!(".cache/novel/pkgs/{}", r_without_last)).unwrap();
