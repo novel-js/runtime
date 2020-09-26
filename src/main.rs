@@ -97,7 +97,7 @@ pub fn resolver<'a>(
             let n = specifier.to_rust_string_lossy(scope);
             let src = std::fs::read(format!(".cache/novel/pkgs/{}", r)).unwrap();
             let module = compile_module(scope, String::from_utf8(src).unwrap(), n);
-            return Some(module.unwrap())
+            module
         }else{
             // let mn = ;
             match MODULE_MAP.lock().unwrap().get(&referrer.get_identity_hash()){
@@ -123,7 +123,7 @@ pub fn resolver<'a>(
             std::fs::write(format!(".cache/novel/pkgs/{}", r), &src).unwrap();
             let module = compile_module(scope, src, n).unwrap();
             MODULE_MAP.lock().unwrap().insert(module.get_identity_hash(), r);
-            return Some(module)
+            Some(module)
         }
        
      
