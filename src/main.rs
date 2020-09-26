@@ -71,14 +71,13 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     );
     let v8str_code: v8::Local<v8::String> = v8::String::new(scope, &code).unwrap();
     let script_source = v8::script_compiler::Source::new(v8str_code, &script_origin);
-    let /* mut*/  module = v8::script_compiler::compile_module(scope, script_source).unwrap();
-    MODULE_MAP.lock().unwrap().insert(module.get_identity_hash(), name);
+    let  module = v8::script_compiler::compile_module(scope, script_source).unwrap();
     let im = module.instantiate_module(scope, resolver);
     if im.is_none(){
-        // module.
-        // println!("Module failed to compile {}", name);
-        // panic!("Module failed to compile");
+        println!("[Warning] Module {} failed to be instantiated.", &name);
     }
+    MODULE_MAP.lock().unwrap().insert(module.get_identity_hash(), name);
+
     // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
     let _result = module.evaluate(scope).unwrap();
     Some(module)
