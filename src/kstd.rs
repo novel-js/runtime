@@ -30,7 +30,7 @@ pub fn print(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_re
 }
 pub fn println(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,) {
     let formatted = core_print(scope, &args);
-    print!("{}\n", formatted);
+    println!("{}", formatted);
 
 }
 
