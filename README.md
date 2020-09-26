@@ -12,7 +12,7 @@ std
 
 * [X] println(...data: Any[]) => void
   - Print `...data` joined by a space, ended with ``\n``.
-  * [ ] TODO: Support deep printing JSON objects.
+  * [X] TODO: Support deep printing JSON objects.
 * [X] print(...data: Any[]) => void
   - Print `...data` joined by a space.
   * [X] TODO: Support deep printing JSON objects.
