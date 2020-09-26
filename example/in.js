@@ -16,5 +16,10 @@ import std from "https://novel-js.github.io/pkgs/std/std/dist.js";
         "c": a
     }
     std.println(b)
+    std.file.write("/test.txt", "test").then(c => {
+        std.println(c)
+    }).catch(e => {
+        std.println("err", e)
+    })
 })()
 // import { print } from "../pkgs/buckets/std/projects/std/dist";
