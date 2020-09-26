@@ -89,23 +89,10 @@ pub fn resolver<'a>(
         
         let scope = &mut v8::CallbackScope::new(context);
         let r = specifier.to_rust_string_lossy(scope);
-        
         let mut response = isahc::get(r).unwrap();
         let n = specifier.to_rust_string_lossy(scope);
-        // let n = format!("{}.js", rand::random::<u32>().to_string());
-
         let src = response.text().unwrap();
-        // println!("src: {} r: {} n: {}\n", src, specifier.to_rust_string_lossy(scope), n);
-        // let cwd_s = &std::env::current_dir().unwrap().into_os_string();
-        // let cwd = std::path::Path::new(cwd_s);
-        // println!("Trying to load {}", specifier.to_rust_string_lossy(scope));
-        // let path = std::path::Path::new(&r);
-        // println!("path = {}", path.to_string_lossy());
-
-        // let code_input = std::fs::read(path).unwrap();
         let module = compile_module(scope, src, n);
-        // MODULE_MAP.lock().unwrap().insert(module.unwrap().get_identity_hash(), std::env::current_dir().unwrap().to_str().unwrap().into());
-
         return Some(module.unwrap())
      
     }
