@@ -81,7 +81,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     }
     // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
     let _result = module.evaluate(scope).unwrap();
-    return Some(module)
+    Some(module)
 }
 pub fn resolver<'a>(
     context: v8::Local<'a, v8::Context>,
