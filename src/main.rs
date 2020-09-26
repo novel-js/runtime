@@ -29,7 +29,10 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
         v8::String::new(scope, "fs_read").unwrap(),
         v8::Function::new(scope, kfs::read).unwrap(),
     ));
-
+    funcs.push((
+        v8::String::new(scope, "fs_write").unwrap(),
+        v8::Function::new(scope, kfs::write).unwrap(),
+    ));
     let global_std_obj = v8::Object::new(scope);
     for funcs in funcs {
         global_std_obj
