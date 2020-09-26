@@ -148,13 +148,5 @@ fn main() {
     let code_input = std::fs::read("example/in.js").unwrap();
     // println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
     let module = compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into());
-    match module{
-        Some(_m) => {
-
-            // m.
-            // println!("Mod map: {:?}",MODULE_MAP.lock().unwrap());
-
-        }
-        None => {}
-    }
+    module.unwrap();
 }
