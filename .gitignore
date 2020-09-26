@@ -1,2 +1,3 @@
 /target
 pkgs/node_modules
+.cache
