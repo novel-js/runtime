@@ -4,7 +4,6 @@ extern crate lazy_static;
 mod kfs;
 mod kstd;
 use isahc::prelude::*;
-use rand::Rng;
 lazy_static!{
     static ref MODULE_MAP: std::sync::Mutex<std::collections::HashMap<i32, String>> = std::sync::Mutex::new(std::collections::HashMap::new());
 }
@@ -27,7 +26,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
         v8::Function::new(scope, kstd::assert).unwrap(),
     ));
     funcs.push((
-        v8::String::new(scope, "file_read").unwrap(),
+        v8::String::new(scope, "fs_read").unwrap(),
         v8::Function::new(scope, kfs::read).unwrap(),
     ));
 
@@ -67,6 +66,11 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     let script_source = v8::script_compiler::Source::new(v8str_code, &script_origin);
     let /* mut*/  module = v8::script_compiler::compile_module(scope, script_source).unwrap();
     let im = module.instantiate_module(scope, resolver);
+    if im.is_none(){
+        // module.
+        // println!("Module failed to compile {}", name);
+        // panic!("Module failed to compile");
+    }
     // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
     let _result = module.evaluate(scope).unwrap();
     return Some(module)
@@ -87,7 +91,8 @@ pub fn resolver<'a>(
         let r = specifier.to_rust_string_lossy(scope);
         
         let mut response = isahc::get(r).unwrap();
-        let n = format!("{}.js", rand::random::<u32>().to_string());
+        let n = specifier.to_rust_string_lossy(scope);
+        // let n = format!("{}.js", rand::random::<u32>().to_string());
 
         let src = response.text().unwrap();
         // println!("src: {} r: {} n: {}\n", src, specifier.to_rust_string_lossy(scope), n);

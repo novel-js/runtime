@@ -1,5 +1,5 @@
 use rusty_v8 as v8;
-use std::convert::TryFrom;
+// use std::convert::TryFrom;
 //TODO: Make this support configs.
 fn core_print(
     scope: &mut v8::HandleScope,
@@ -33,8 +33,8 @@ pub fn assert(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_r
         }else{
             println!("Assertion failed");
         }
-        let arg0 = args.get(0);
-    let func = v8::Local::<v8::Function>::try_from(arg0).unwrap();
+        // let arg0 = args.get(0);
+    // let func = v8::Local::<v8::Function>::try_from(arg0).unwrap();
     }
 }
 // pub fn callback_test(scope: &mut v8::HandleScope, _args: v8::FunctionCallbackArguments,mut ret:  v8::ReturnValue,){

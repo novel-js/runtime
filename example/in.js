@@ -1,8 +1,10 @@
+/// <reference>
+import {println, print, file} from "http://pkgs.io:3030/pkg/std/std";
 
-// import {a} from "http://pkgs.io:3030/pkg/std/std"
-// $.println(a)
-// import * as a from "http://pkgs.io:3030/pkg/std/std"
-// $.println(a.a)
-import {println, print} from "http://pkgs.io:3030/pkg/std/std";
-
-println(5+5)
+file.read("example/test.txt").then(content => {
+    print("content", content)
+}).catch(err => {
+    print("err", err)
+})
+// import {read} from "http://pkgs.io:3030/pkg/std/file";
+// println(read)
