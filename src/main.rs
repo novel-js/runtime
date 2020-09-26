@@ -81,11 +81,7 @@ pub fn resolver<'a>(
     _referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
     unsafe{
-        //TODO: Get this actually working. 
-        /* TODO: 
-            Calculate `cwd/specifier`
-            Seems to not be working but shouldn't be that hard to fix
-        */
+       
         
         let scope = &mut v8::CallbackScope::new(context);
         let r = specifier.to_rust_string_lossy(scope);
