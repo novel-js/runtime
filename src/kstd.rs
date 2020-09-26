@@ -19,7 +19,7 @@ fn core_print(
 
         }   
     }
-    return acc.join(" ");
+    acc.join(" ")
 }
 
 pub fn print(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,) {
