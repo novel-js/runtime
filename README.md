@@ -7,16 +7,21 @@ If you have any code improvements, or general ideas feel  free to make a pull re
 
 Current plans for std
 
-STD
+std
 ===
-println(...data: Any[]) => void
-print(...data: Any[]) => void
-assert(assertion, message) => void
-open() => File
-exists(filename) => Promise<boolean>
-File
-====
-read()           => Promise<String>
-write(content)   => Promise<void>
-append(content)  => Promise<void>
 
+* [X] println(...data: Any[]) => void
+
+* [X] print(...data: Any[]) => void
+
+* [X] assert(assertion, message) => void
+
+
+
+std.file
+====
+* [X] read()           => Promise<String>
+* [ ] write(content)   => Promise<void>
+* [ ]  append(content)  => Promise<void>
+* [ ] open() => File
+* [ ] exists(filename) => Promise<boolean>
