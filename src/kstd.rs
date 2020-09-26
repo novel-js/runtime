@@ -9,7 +9,18 @@ fn core_print(
     
     for i in 0..func_callback_args.length() {
         let arg = func_callback_args.get(i);
-        acc.push(arg.to_string(scope).unwrap().to_rust_string_lossy(scope))
+        if arg.is_object(){
+            let a_obj = arg.to_object(scope).unwrap().into();
+            match v8::json::stringify(scope, a_obj){
+                Some(stringifed) => {
+                    acc.push(stringifed.to_rust_string_lossy(scope))
+                }
+                None => {}
+            }
+        }else{
+            acc.push(arg.to_string(scope).unwrap().to_rust_string_lossy(scope))
+
+        }   
     }
     return acc.join(" ");
 }

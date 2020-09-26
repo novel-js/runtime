@@ -15,7 +15,7 @@ std
   * [ ] TODO: Support deep printing JSON objects.
 * [X] print(...data: Any[]) => void
   - Print `...data` joined by a space.
-  * [ ] TODO: Support deep printing JSON objects.
+  * [X] TODO: Support deep printing JSON objects.
 * [X] assert(assertion, message) => void
   - Check `assertion == true`, if its not, print `message`. 
 
@@ -23,11 +23,12 @@ std
 
 std.file
 ====
-* [X] read()           => Promise<String>
-* [ ] write(content)   => Promise<void>
-* [ ]  append(content)  => Promise<void>
-* [ ] open() => File
-* [ ] exists(filename) => Promise<boolean>
+| Status       | Function name    | Args     | Returns  |
+| :------------- | :----------: | :----------: | :---: |
+|  ✔             | read   | filename           | Promise\<String\> |
+|  ✔             | write   | filename, content |  undefined |
+|  ✖            | append   | filename, content |  undefined |
+|  ✖            | exists   | filename |  undefined |
 
 std.http
 ========
