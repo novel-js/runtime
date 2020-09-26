@@ -50,9 +50,9 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     global.set(scope, k, global_std_obj.into());
     //TODO: Change in.js to detect what file is being run (future)
     let script_origin_resource_name = v8::String::new(scope, &name).unwrap().into();
-    let script_origin_line_offset = v8::Integer::new(scope, 0).into();
-    let script_origin_column_offset = v8::Integer::new(scope, 0).into();
-    let script_origin_is_cross_origin = v8::Boolean::new(scope, false).into();
+    let script_origin_line_offset = v8::Integer::new(scope, 0);
+    let script_origin_column_offset = v8::Integer::new(scope, 0);
+    let script_origin_is_cross_origin = v8::Boolean::new(scope, false);
     let script_origin_script_id = v8::Integer::new(scope, 123);
     let script_origin_sourcemap_url = v8::String::new(scope, "").unwrap().into();
     let script_origin_opaque = v8::Boolean::new(scope, true);
