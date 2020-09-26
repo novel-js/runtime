@@ -41,9 +41,17 @@ pub fn assert(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_r
         }else{
             println!("Assertion failed");
         }
-        // let arg0 = args.get(0);
-    // let func = v8::Local::<v8::Function>::try_from(arg0).unwrap();
     }
+}
+pub fn assert_or_panic(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
+    // if args.get(0) == v8::Boolean::new(scope, false){
+        // if args.length() >= 2{ //Todo, find out why this needs to be 2.
+        //     panic!("Assertion failed: {}", args.get(1).to_string(scope).unwrap().to_rust_string_lossy(scope))
+        // }else{
+        //     panic!("Assertion failed");
+        // }
+    // }
+    assert_eq!(args.get(0).to_string(scope).unwrap().to_rust_string_lossy(scope), args.get(1).to_string(scope).unwrap().to_rust_string_lossy(scope))
 }
 // pub fn callback_test(scope: &mut v8::HandleScope, _args: v8::FunctionCallbackArguments,mut ret:  v8::ReturnValue,){
 //     let resolver = v8::PromiseResolver::new(scope).unwrap();
