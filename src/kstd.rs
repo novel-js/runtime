@@ -11,11 +11,8 @@ fn core_print(
         let arg = func_callback_args.get(i);
         if arg.is_object(){
             let a_obj = arg.to_object(scope).unwrap().into();
-            match v8::json::stringify(scope, a_obj){
-                Some(stringifed) => {
-                    acc.push(stringifed.to_rust_string_lossy(scope))
-                }
-                None => {}
+            if let Some(stringified) =  v8::json::stringify(scope, a_obj){
+                    acc.push(stringified.to_rust_string_lossy(scope))
             }
         }else{
             acc.push(arg.to_string(scope).unwrap().to_rust_string_lossy(scope))
