@@ -6,3 +6,4 @@ const file = {
     read: read
 }
 export {println, print, file}
+export default {println, print, file}

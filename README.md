@@ -11,10 +11,13 @@ std
 ===
 
 * [X] println(...data: Any[]) => void
-
+  - Print `...data` joined by a space, ended with ``\n``.
+  * [ ] TODO: Support deep printing JSON objects.
 * [X] print(...data: Any[]) => void
-
+  - Print `...data` joined by a space.
+  * [ ] TODO: Support deep printing JSON objects.
 * [X] assert(assertion, message) => void
+  - Check `assertion == true`, if its not, print `message`. 
 
 
 
@@ -25,3 +28,7 @@ std.file
 * [ ]  append(content)  => Promise<void>
 * [ ] open() => File
 * [ ] exists(filename) => Promise<boolean>
+
+std.http
+========
+- I dont have many plans for http, But soon I want a basic `get` function.
