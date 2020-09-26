@@ -1,5 +1,5 @@
 /// <reference>
-import {println} from "https://novel-js.github.io/pkgs/std/std/println.js";
+import {println} from "https://novel-js.github.io/pkgs/std/std/dist.js";
 println("a")
 // file.read("example/test.txt").then(content => {
 //     print("content", content)

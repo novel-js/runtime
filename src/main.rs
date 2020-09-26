@@ -65,6 +65,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     let v8str_code: v8::Local<v8::String> = v8::String::new(scope, &code).unwrap();
     let script_source = v8::script_compiler::Source::new(v8str_code, &script_origin);
     let /* mut*/  module = v8::script_compiler::compile_module(scope, script_source).unwrap();
+    MODULE_MAP.lock().unwrap().insert(module.get_identity_hash(), name);
     let im = module.instantiate_module(scope, resolver);
     if im.is_none(){
         // module.
@@ -78,18 +79,46 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
 pub fn resolver<'a>(
     context: v8::Local<'a, v8::Context>,
     specifier: v8::Local<'a, v8::String>,
-    _referrer: v8::Local<'a, v8::Module>,
+    referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
     unsafe{
-       
-        
         let scope = &mut v8::CallbackScope::new(context);
+
+        // println!("ref = {}\nspec = {}", referrer.get_identity_hash(), specifier.to_rust_string_lossy(scope));
         let r = specifier.to_rust_string_lossy(scope);
-        let mut response = isahc::get(r).unwrap();
-        let n = specifier.to_rust_string_lossy(scope);
-        let src = response.text().unwrap();
-        let module = compile_module(scope, src, n);
-        return Some(module.unwrap())
+        if std::fs::read(format!(".cache/novel/pkgs/{}", r,)).is_ok(){
+            let n = specifier.to_rust_string_lossy(scope);
+            let src = std::fs::read(format!(".cache/novel/pkgs/{}", r)).unwrap();
+            let module = compile_module(scope, String::from_utf8(src).unwrap(), n);
+            return Some(module.unwrap())
+        }else{
+            // let mn = ;
+            match MODULE_MAP.lock().unwrap().get(&referrer.get_identity_hash()){
+                Some(s) => {
+                    println!("Pulling dependency... GET {} for {}", &r, s);
+
+                }
+                None => {
+                    println!("Pulling dependency... GET {} for an unknown dependency", &r);
+
+                }
+            }
+
+            let mut response = isahc::get(r).unwrap();
+            let n = specifier.to_rust_string_lossy(scope);
+            let src = response.text().unwrap();
+            let r = specifier.to_rust_string_lossy(scope);
+            // println!("{}", format!(".cache/novel/pkgs/{}", r));
+            let last = r.split("/").last().unwrap();
+            let r_without_last = r.replace(last, "");
+            // println!("last =  {} r without lsat = {}", &last, &r_without_last);
+            std::fs::create_dir_all(format!(".cache/novel/pkgs/{}", r_without_last)).unwrap();
+            std::fs::write(format!(".cache/novel/pkgs/{}", r), &src).unwrap();
+            let module = compile_module(scope, src, n).unwrap();
+            MODULE_MAP.lock().unwrap().insert(module.get_identity_hash(), r);
+            return Some(module)
+        }
+       
      
     }
     
@@ -116,6 +145,7 @@ fn main() {
         Some(_m) => {
 
             // m.
+            // println!("Mod map: {:?}",MODULE_MAP.lock().unwrap());
 
         }
         None => {}
