@@ -28,7 +28,7 @@ std.file
 |  ✔             | read   | filename           | Promise\<String\> |
 |  ✔             | write   | filename, content |  undefined |
 |  ✔            | append   | filename, content |  undefined |
-|  ✖            | exists   | filename |  Promise<boolean> |
+|  ✔           | exists   | filename |  Promise<boolean> |
 
 std.http
 ========
