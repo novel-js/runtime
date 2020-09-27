@@ -4,11 +4,12 @@ name: build
 
 jobs:
   check:
-    name: Rust project
+    name: Build for release
     runs-on: ${{ matrix.os }}
-    matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        rust: [stable, nightly]
+    strategy:
+      matrix:
+          os: [ubuntu-latest, windows-latest, macOS-latest]
+          rust: [stable, nightly]
     steps:
       - uses: actions/checkout@v2
       - name: Install latest nightly
