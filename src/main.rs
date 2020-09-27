@@ -110,13 +110,8 @@ pub fn compile_module<'a>(
                     line.to_rust_string_lossy(tc).bright_white().bold()
                 );
                 let mut cols: Vec<u8> = vec![];
-                for _ in 0..msg.get_start_column() {
-                    cols.push(b' ');
-                }
-
-                for _ in msg.get_start_column()..msg.get_end_column() {
-                    cols.push(b'^');
-                }
+                cols.resize(msg.get_start_column(), b' ');
+                cols.resize(msg.get_end_column(), b'^');
                 println!(
                     "{} {}: {}",
                     String::from_utf8(cols).unwrap().bold().bright_yellow(),

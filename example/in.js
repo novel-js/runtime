@@ -1,5 +1,5 @@
 import {println} from "https://novel-js.github.io/pkgs/std/std/println.js";
-
+/// <reference path="./" />
 import std from "https://novel-js.github.io/pkgs/std/std/dist.js";
 // import test from "https://novel-js.github.io/pkgs/std/testing/dist.js";
 
