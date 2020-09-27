@@ -1,6 +1,11 @@
 import std from "https://novel-js.github.io/pkgs/std/std/dist.js"
-// std.assertOrPanic(5==5)
-// std.print('test')
-// std.assertOrPanic(5==5, "Five is equal to 5")
-// std.print(std.assertOrPanic)
-$.assertOrPanic(5==5, 'test')
+
+const a = 5;
+const b = 10;
+const c = a * b;
+const d = b / a;
+const e = a - b;
+const f = 5/0; // => Infinity
+const bucket = a * b +b * c + c * d * d + e * e + f * f;
+
+std.println(bucket)

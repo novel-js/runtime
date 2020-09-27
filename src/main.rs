@@ -9,6 +9,29 @@ lazy_static! {
     static ref MODULE_MAP: std::sync::Mutex<std::collections::HashMap<i32, String>> =
         std::sync::Mutex::new(std::collections::HashMap::new());
 }
+//stolen directly from the rusty_v8 tests.rs
+lazy_static! {
+    static ref INIT_LOCK: std::sync::Mutex<u32> = std::sync::Mutex::new(0);
+  }
+
+#[must_use]
+struct SetupGuard {}
+
+impl Drop for SetupGuard {
+  fn drop(&mut self) {
+    // TODO shutdown process cleanly.
+  }
+}
+
+fn setup() -> SetupGuard {
+  let mut g = INIT_LOCK.lock().unwrap();
+  *g += 1;
+  if *g == 1 {
+    v8::V8::initialize_platform(v8::new_default_platform().unwrap());
+    v8::V8::initialize();
+  }
+  SetupGuard {}
+}
 
 pub fn compile_module<'a>(
     scope: &mut v8::HandleScope<'a>,
@@ -42,6 +65,10 @@ pub fn compile_module<'a>(
     funcs.push((
         v8::String::new(scope, "fs_append").unwrap(),
         v8::Function::new(scope, kfs::append).unwrap(),
+    ));
+    funcs.push((
+        v8::String::new(scope, "tassert").unwrap(),
+        v8::Function::new(scope, kstd::assert_or_panic).unwrap()
     ));
 
     let global_std_obj = v8::Object::new(scope);
@@ -91,6 +118,7 @@ pub fn compile_module<'a>(
             let im = m.instantiate_module(tc, resolver);
             if im.is_none() {
                 println!("[Warning] Module {} failed to be instantiated.", name);
+                return None
             }
 
             // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
@@ -104,16 +132,14 @@ pub fn compile_module<'a>(
                 let msg = v8::Exception::create_message(tc, teu);
                 let name = msg.get_script_resource_name(tc).unwrap();
                 let line = msg.get_source_line(tc).unwrap();
-                let line_indicator = format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
+                let line_indicator =
+                    format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
                 let line_offset = vec![b' '; line_indicator.len()];
                 print!(
                     "\n\nFile {}\n{}{}\n{}",
-
                     name.to_string(tc).unwrap().to_rust_string_lossy(tc),
                     String::from_utf8(line_offset).unwrap(),
-
                     line.to_rust_string_lossy(tc).bright_white().bold(),
-
                     line_indicator,
                 );
                 let mut cols: Vec<u8> = vec![];
@@ -124,7 +150,7 @@ pub fn compile_module<'a>(
                     "{} {}: {}\n\n",
                     // String::from_utf8(line_offset).unwrap(),
                     String::from_utf8(cols).unwrap().bold().bright_yellow(),
-                    "Error".yellow(),
+                    "".bright_green(),
                     tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
                 );
             }
@@ -132,6 +158,7 @@ pub fn compile_module<'a>(
             tc.reset();
             None
         }
+        
     }
 }
 pub fn resolver<'a>(
@@ -183,11 +210,11 @@ pub fn resolver<'a>(
         }
     }
 }
+
+
 #[test]
-fn test_add() {
-    let platform = v8::new_default_platform().unwrap();
-    v8::V8::initialize_platform(platform);
-    v8::V8::initialize();
+fn math_test(){
+    let _setup_guard = setup();
     let isolate = &mut v8::Isolate::new(Default::default());
     let scope = &mut v8::HandleScope::new(isolate);
     let context = v8::Context::new(scope);
@@ -196,13 +223,45 @@ fn test_add() {
     let module = compile_module(
         scope,
         String::from_utf8(code_input).unwrap(),
-        "example/in.js".into(),
+        "tests/math.js".into(),
     )
     .unwrap();
-    let result = module.evaluate(scope).unwrap();
-    // println!("{}", result.to_string(scope).unwrap().to_rust_string_lossy(scope));
-    // assert!(result.to_string(scope).unwrap().to_rust_string_lossy(scope) == "10");
+    let tc = &mut v8::TryCatch::new(scope);
+    let result = module.evaluate(tc);
+    assert_eq!(tc.has_caught(), false);
 }
+#[test]
+fn non_existent_function(){
+    let _setup_guard = setup();
+
+    let isolate = &mut v8::Isolate::new(Default::default());
+    let scope = &mut v8::HandleScope::new(isolate);
+    let context = v8::Context::new(scope);
+    let scope = &mut v8::ContextScope::new(scope, context);
+    let code_input = std::fs::read("tests/non_existent_function.js").unwrap();
+    let module = compile_module(
+        scope,
+        String::from_utf8(code_input).unwrap(),
+        "tests/non_existent_function.js".into(),
+    );
+    assert!(module.is_none());
+ }
+ #[test]
+fn fails_to_compile(){
+    let _setup_guard = setup();
+
+    let isolate = &mut v8::Isolate::new(Default::default());
+    let scope = &mut v8::HandleScope::new(isolate);
+    let context = v8::Context::new(scope);
+    let scope = &mut v8::ContextScope::new(scope, context);
+    let code_input = std::fs::read("tests/fails_to_compile.js").unwrap();
+    let module = compile_module(
+        scope,
+        String::from_utf8(code_input).unwrap(),
+        "tests/fails_to_compile.js".into(),
+    );
+    assert!(module.is_none());
+ }
 fn main() {
     // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
     let platform = v8::new_default_platform().unwrap();

@@ -5,6 +5,8 @@ import std from "https://novel-js.github.io/pkgs/std/std/dist.js";
 
 (async function(){
     // synx err;
+    // const a = 5;
+    // let a =  b;
     std.file.write("test.txt", "test file")
     std.file.append("test.txt", "A new line!");
     // std.file.exists("test.txt").then(exi => {
@@ -24,5 +26,6 @@ import std from "https://novel-js.github.io/pkgs/std/std/dist.js";
     }).catch(e => {
         std.println("err", e)
     })
+    std.println(5/0)
 })()
 // import { print } from "../pkgs/buckets/std/projects/std/dist";

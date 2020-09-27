@@ -58,13 +58,14 @@ pub fn assert(
         }
     }
 }
-// pub fn assert_or_panic(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
+pub fn assert_or_panic(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
 // if args.get(0) == v8::Boolean::new(scope, false){
 // if args.length() >= 2{ //Todo, find out why this needs to be 2.
-//     panic!("Assertion failed: {}", args.get(1).to_string(scope).unwrap().to_rust_string_lossy(scope))
+//     // assert()
+//     // panic!("Assertion failed: {}", args.get(1).to_string(scope).unwrap().to_rust_string_lossy(scope))
 // }else{
-//     panic!("Assertion failed");
+//     // panic!("Assertion failed");
 // }
 // }
-// assert_eq!(args.get(0).to_string(scope).unwrap().to_rust_string_lossy(scope), args.get(1).to_string(scope).unwrap().to_rust_string_lossy(scope))
-// }
+    assert_eq!(args.get(0).to_string(scope).unwrap().to_rust_string_lossy(scope), "false")
+}
