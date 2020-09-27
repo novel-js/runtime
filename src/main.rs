@@ -260,7 +260,7 @@ fn fails_to_compile(){
         String::from_utf8(code_input).unwrap(),
         "tests/fails_to_compile.js".into(),
     );
-    assert!(module.is_none());
+    assert!(module.is_some());
  }
 fn main() {
     // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
