@@ -161,6 +161,24 @@ pub fn compile_module<'a>(
         
     }
 }
+fn get_cache_path(r: &str) -> std::path::PathBuf{
+    if cfg!(windows){
+        let mut p = std::path::PathBuf::new();
+        // p.push(std::path::Path::)
+        p.push(std::env::current_dir().unwrap());
+        p.push("novel");
+        p.push("pkgs");
+        p.push(r);
+        p
+    }else{
+        let mut p = std::path::PathBuf::new();
+        p.push(".cache");
+        p.push("novel");
+        p.push("pkgs");
+        p.push(r);
+        p
+    }
+}
 pub fn resolver<'a>(
     context: v8::Local<'a, v8::Context>,
     specifier: v8::Local<'a, v8::String>,
@@ -171,11 +189,7 @@ pub fn resolver<'a>(
 
         // println!("ref = {}\nspec = {}", referrer.get_identity_hash(), specifier.to_rust_string_lossy(scope));
         let r = specifier.to_rust_string_lossy(scope);
-        let mut p = std::path::PathBuf::new();
-        p.push(".cache");
-        p.push("novel");
-        p.push("pkgs");
-        p.push(r.clone());
+        let p = get_cache_path(&r);
         if std::fs::read(&p).is_ok() {
             let n = specifier.to_rust_string_lossy(scope);
             let src = std::fs::read(&p).unwrap();
