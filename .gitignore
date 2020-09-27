@@ -1,4 +1,4 @@
 /target
-.pkgs/node_modules
+.pkgs
 .cache
 test.txt
