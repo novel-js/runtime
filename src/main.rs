@@ -22,7 +22,7 @@ impl Drop for SetupGuard {
     // TODO shutdown process cleanly.
   }
 }
-
+#[cfg(test)]
 fn setup() -> SetupGuard {
   let mut g = INIT_LOCK.lock().unwrap();
   *g += 1;
@@ -227,7 +227,7 @@ fn math_test(){
     )
     .unwrap();
     let tc = &mut v8::TryCatch::new(scope);
-    let result = module.evaluate(tc);
+    let _result = module.evaluate(tc);
     assert_eq!(tc.has_caught(), false);
 }
 #[test]
