@@ -104,16 +104,25 @@ pub fn compile_module<'a>(
                 let msg = v8::Exception::create_message(tc, teu);
                 let name = msg.get_script_resource_name(tc).unwrap();
                 let line = msg.get_source_line(tc).unwrap();
-                println!(
-                    "{}\n{}",
+                let line_indicator = format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
+                let line_offset = vec![b' '; line_indicator.len()];
+                print!(
+                    "\n\nFile {}\n{}{}\n{}",
+
                     name.to_string(tc).unwrap().to_rust_string_lossy(tc),
-                    line.to_rust_string_lossy(tc).bright_white().bold()
+                    String::from_utf8(line_offset.clone()).unwrap(),
+
+                    line.to_rust_string_lossy(tc).bright_white().bold(),
+
+                    line_indicator,
                 );
                 let mut cols: Vec<u8> = vec![];
+                // cols.resize(line_indicator.len(), b'%');
                 cols.resize(msg.get_start_column(), b' ');
                 cols.resize(msg.get_end_column(), b'^');
                 println!(
-                    "{} {}: {}",
+                    "{} {}: {}\n\n",
+                    // String::from_utf8(line_offset).unwrap(),
                     String::from_utf8(cols).unwrap().bold().bright_yellow(),
                     "Error".yellow(),
                     tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
