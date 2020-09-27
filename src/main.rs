@@ -171,9 +171,14 @@ pub fn resolver<'a>(
 
         // println!("ref = {}\nspec = {}", referrer.get_identity_hash(), specifier.to_rust_string_lossy(scope));
         let r = specifier.to_rust_string_lossy(scope);
-        if std::fs::read(format!(".cache/novel/pkgs/{}", r,)).is_ok() {
+        let mut p = std::path::PathBuf::new();
+        p.push(".cache");
+        p.push("novel");
+        p.push("pkgs");
+        p.push(r.clone());
+        if std::fs::read(&p).is_ok() {
             let n = specifier.to_rust_string_lossy(scope);
-            let src = std::fs::read(format!(".cache/novel/pkgs/{}", r)).unwrap();
+            let src = std::fs::read(&p).unwrap();
             compile_module(scope, String::from_utf8(src).unwrap(), n)
         } else {
             // println!("mod map: {:?}", MODULE_MAP.lock().unwrap());
@@ -199,8 +204,13 @@ pub fn resolver<'a>(
             let last = r.split('/').last().unwrap();
             let r_without_last = r.replace(last, "");
             // println!("last =  {} r without lsat = {}", &last, &r_without_last);
-            std::fs::create_dir_all(format!(".cache/novel/pkgs/{}", r_without_last)).unwrap();
-            std::fs::write(format!(".cache/novel/pkgs/{}", r), &src).unwrap();
+            let mut p2 = std::path::PathBuf::new();
+            p2.push(".cache");
+            p2.push("novel");
+            p2.push("pkgs");
+            p2.push(&r_without_last);
+            std::fs::create_dir_all(p2).unwrap();
+            std::fs::write(p, &src).unwrap();
             let module = compile_module(scope, src, n).unwrap();
             MODULE_MAP
                 .lock()
