@@ -110,7 +110,7 @@ pub fn compile_module<'a>(
                     "\n\nFile {}\n{}{}\n{}",
 
                     name.to_string(tc).unwrap().to_rust_string_lossy(tc),
-                    String::from_utf8(line_offset.clone()).unwrap(),
+                    String::from_utf8(line_offset).unwrap(),
 
                     line.to_rust_string_lossy(tc).bright_white().bold(),
 
