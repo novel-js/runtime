@@ -3,13 +3,18 @@ use rusty_v8 as v8;
 extern crate lazy_static;
 mod kfs;
 mod kstd;
-use isahc::prelude::*;
 use colored::*;
-lazy_static!{
-    static ref MODULE_MAP: std::sync::Mutex<std::collections::HashMap<i32, String>> = std::sync::Mutex::new(std::collections::HashMap::new());
+use isahc::prelude::*;
+lazy_static! {
+    static ref MODULE_MAP: std::sync::Mutex<std::collections::HashMap<i32, String>> =
+        std::sync::Mutex::new(std::collections::HashMap::new());
 }
 
-pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: String) ->Option<v8::Local<'a, v8::Module>>{
+pub fn compile_module<'a>(
+    scope: &mut v8::HandleScope<'a>,
+    code: String,
+    name: String,
+) -> Option<v8::Local<'a, v8::Module>> {
     // Register functions into object
     // println!("Name is {}", name);
     let mut funcs: Vec<(v8::Local<v8::String>, v8::Local<v8::Function>)> = vec![];
@@ -38,10 +43,7 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
         v8::String::new(scope, "fs_append").unwrap(),
         v8::Function::new(scope, kfs::append).unwrap(),
     ));
-    funcs.push((
-        v8::String::new(scope, "assertOrPanic").unwrap(),
-        v8::Function::new(scope, kstd::assert_or_panic).unwrap(),
-    ));
+
     let global_std_obj = v8::Object::new(scope);
     for funcs in funcs {
         global_std_obj
@@ -78,70 +80,83 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
     let script_source = v8::script_compiler::Source::new(v8str_code, &script_origin);
     let tc = &mut v8::TryCatch::new(scope);
     tc.set_verbose(true);
-    let  module = v8::script_compiler::compile_module(tc, script_source);
-    match module{
+    let module = v8::script_compiler::compile_module(tc, script_source);
+    match module {
         Some(m) => {
-            MODULE_MAP.lock().unwrap().insert(m.get_identity_hash(), name.clone());
+            MODULE_MAP
+                .lock()
+                .unwrap()
+                .insert(m.get_identity_hash(), name.clone());
 
             let im = m.instantiate_module(tc, resolver);
-            if im.is_none(){
+            if im.is_none() {
                 println!("[Warning] Module {} failed to be instantiated.", name);
             }
-        
+
             // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
             //TODO: figure out if this should stay
             // let _result = module.evaluate(scope).unwrap();
             Some(m)
         }
         None => {
-            if tc.has_caught(){
+            if tc.has_caught() {
                 let teu = tc.exception().unwrap();
                 let msg = v8::Exception::create_message(tc, teu);
                 let name = msg.get_script_resource_name(tc).unwrap();
                 let line = msg.get_source_line(tc).unwrap();
-                println!("{}\n{}", name.to_string(tc).unwrap().to_rust_string_lossy(tc), line.to_rust_string_lossy(tc).bright_white().bold());
+                println!(
+                    "{}\n{}",
+                    name.to_string(tc).unwrap().to_rust_string_lossy(tc),
+                    line.to_rust_string_lossy(tc).bright_white().bold()
+                );
                 let mut cols: Vec<u8> = vec![];
-                for _ in 0..msg.get_start_column(){
+                for _ in 0..msg.get_start_column() {
                     cols.push(b' ');
                 }
-                
-                for _ in msg.get_start_column()..msg.get_end_column(){
-                        cols.push(b'^');
+
+                for _ in msg.get_start_column()..msg.get_end_column() {
+                    cols.push(b'^');
                 }
-                println!("{} {}: {}", String::from_utf8(cols).unwrap().bold().bright_yellow(),"Error".yellow(), tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red());
+                println!(
+                    "{} {}: {}",
+                    String::from_utf8(cols).unwrap().bold().bright_yellow(),
+                    "Error".yellow(),
+                    tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
+                );
             }
             tc.rethrow();
             tc.reset();
             None
         }
     }
-   
 }
 pub fn resolver<'a>(
     context: v8::Local<'a, v8::Context>,
     specifier: v8::Local<'a, v8::String>,
     referrer: v8::Local<'a, v8::Module>,
 ) -> Option<v8::Local<'a, v8::Module>> {
-    unsafe{
+    unsafe {
         let scope = &mut v8::CallbackScope::new(context);
 
         // println!("ref = {}\nspec = {}", referrer.get_identity_hash(), specifier.to_rust_string_lossy(scope));
         let r = specifier.to_rust_string_lossy(scope);
-        if std::fs::read(format!(".cache/novel/pkgs/{}", r,)).is_ok(){
+        if std::fs::read(format!(".cache/novel/pkgs/{}", r,)).is_ok() {
             let n = specifier.to_rust_string_lossy(scope);
             let src = std::fs::read(format!(".cache/novel/pkgs/{}", r)).unwrap();
             compile_module(scope, String::from_utf8(src).unwrap(), n)
-        }else{
+        } else {
             // println!("mod map: {:?}", MODULE_MAP.lock().unwrap());
             // let mn = ;
-            match MODULE_MAP.lock().unwrap().get(&referrer.get_identity_hash()){
+            match MODULE_MAP
+                .lock()
+                .unwrap()
+                .get(&referrer.get_identity_hash())
+            {
                 Some(s) => {
                     println!("Pulling dependency... GET {} for {}", &r, s);
-
                 }
                 None => {
                     println!("Pulling dependency... GET {} for an unknown dependency", &r);
-
                 }
             }
 
@@ -156,30 +171,33 @@ pub fn resolver<'a>(
             std::fs::create_dir_all(format!(".cache/novel/pkgs/{}", r_without_last)).unwrap();
             std::fs::write(format!(".cache/novel/pkgs/{}", r), &src).unwrap();
             let module = compile_module(scope, src, n).unwrap();
-            MODULE_MAP.lock().unwrap().insert(module.get_identity_hash(), r);
+            MODULE_MAP
+                .lock()
+                .unwrap()
+                .insert(module.get_identity_hash(), r);
             Some(module)
         }
-       
-     
     }
-    
 }
 #[test]
-fn test_add(){
+fn test_add() {
     let platform = v8::new_default_platform().unwrap();
     v8::V8::initialize_platform(platform);
     v8::V8::initialize();
-    let isolate = &mut v8::Isolate::new(Default::default());    
+    let isolate = &mut v8::Isolate::new(Default::default());
     let scope = &mut v8::HandleScope::new(isolate);
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
     let code_input = std::fs::read("tests/math.js").unwrap();
-    let module = compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into()).unwrap();
+    let module = compile_module(
+        scope,
+        String::from_utf8(code_input).unwrap(),
+        "example/in.js".into(),
+    )
+    .unwrap();
     let result = module.evaluate(scope).unwrap();
     // println!("{}", result.to_string(scope).unwrap().to_rust_string_lossy(scope));
     // assert!(result.to_string(scope).unwrap().to_rust_string_lossy(scope) == "10");
-
-
 }
 fn main() {
     // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
@@ -197,7 +215,10 @@ fn main() {
     //TODO: Support different file names
     let code_input = std::fs::read("example/in.js").unwrap();
     // println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
-    let module = compile_module(scope,String::from_utf8( code_input).unwrap(), "example/in.js".into());
+    let module = compile_module(
+        scope,
+        String::from_utf8(code_input).unwrap(),
+        "example/in.js".into(),
+    );
     module.unwrap().evaluate(scope).unwrap();
-    
 }
