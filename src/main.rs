@@ -219,11 +219,13 @@ fn math_test(){
     let scope = &mut v8::HandleScope::new(isolate);
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
-    let code_input = std::fs::read("tests/math.js").unwrap();
+    let p: std::path::PathBuf = ["tests", "math.js"].iter().collect();
+
+    let code_input = std::fs::read(&p).unwrap();
     let module = compile_module(
         scope,
         String::from_utf8(code_input).unwrap(),
-        "tests/math.js".into(),
+        p.to_str().unwrap().into(),
     )
     .unwrap();
     let tc = &mut v8::TryCatch::new(scope);
@@ -238,11 +240,13 @@ fn non_existent_function(){
     let scope = &mut v8::HandleScope::new(isolate);
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
-    let code_input = std::fs::read("tests/non_existent_function.js").unwrap();
+    let p: std::path::PathBuf = ["tests", "non_existent_function.js"].iter().collect();
+
+    let code_input = std::fs::read(&p).unwrap();
     let module = compile_module(
         scope,
         String::from_utf8(code_input).unwrap(),
-        "tests/non_existent_function.js".into(),
+        p.to_str().unwrap().into(),
     );
     assert!(module.is_none());
  }
@@ -254,11 +258,13 @@ fn fails_to_compile(){
     let scope = &mut v8::HandleScope::new(isolate);
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
-    let code_input = std::fs::read("tests/fails_to_compile.js").unwrap();
+    let p: std::path::PathBuf = ["tests", "fails_to_compile.js"].iter().collect();
+
+    let code_input = std::fs::read(&p).unwrap();
     let module = compile_module(
         scope,
         String::from_utf8(code_input).unwrap(),
-        "tests/fails_to_compile.js".into(),
+        p.to_str().unwrap().into(),
     );
     assert!(module.is_none());
  }
@@ -276,12 +282,13 @@ fn main() {
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
     //TODO: Support different file names
-    let code_input = std::fs::read("example/in.js").unwrap();
+    let p: std::path::PathBuf = ["example", "in.js"].iter().collect();
+    let code_input = std::fs::read(&p).unwrap();
     // println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
     let module = compile_module(
         scope,
         String::from_utf8(code_input).unwrap(),
-        "example/in.js".into(),
+        p.to_str().unwrap().into(),
     );
     module.unwrap().evaluate(scope).unwrap();
 }
