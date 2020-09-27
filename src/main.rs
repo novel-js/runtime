@@ -102,21 +102,13 @@ pub fn compile_module<'a>(scope: &mut v8::HandleScope<'a>, code: String, name: S
                 println!("{}\n{}", name.to_string(tc).unwrap().to_rust_string_lossy(tc), line.to_rust_string_lossy(tc).bright_white().bold());
                 let mut cols: Vec<u8> = vec![];
                 for _ in 0..msg.get_start_column(){
-                    cols.push(b' ' as u8);
+                    cols.push(b' ');
                 }
-                for i in msg.get_start_column()..msg.get_end_column(){
-                     if i < msg.get_end_column(){
-                        cols.push(b'^' as u8);
-                    }else{
-                        cols.push(b'#' as u8);
-                    }
+                
+                for _ in msg.get_start_column()..msg.get_end_column(){
+                        cols.push(b'^');
                 }
                 println!("{} {}: {}", String::from_utf8(cols).unwrap().bold().bright_yellow(),"Error".yellow(), tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red());
-                // println!("{}", msg.get_start_column());
-            // println!("Excep{}", tc.message().unwrap().get(tc). to_rust_string_lossy(tc));
-                // println!("Error in file {}:\n {}", name, tc.exception().unwrap().to_object(tc).unwrap().to_string(tc).unwrap().to_rust_string_lossy(tc));
-            // tc.
-            // println!("{}", tc.exception())
             }
             tc.rethrow();
             tc.reset();
