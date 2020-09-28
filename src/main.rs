@@ -41,7 +41,6 @@ pub fn compile_module<'a>(
     // Register functions into object
     // println!("Name is {}", name);
     let mut funcs: Vec<(v8::Local<v8::String>, v8::Local<v8::Function>)> = vec![];
-
     funcs.push((
         v8::String::new(scope, "print").unwrap(),
         v8::Function::new(scope, kstd::print).unwrap(),
@@ -77,6 +76,10 @@ pub fn compile_module<'a>(
     funcs.push((
         v8::String::new(scope, "is_nix",).unwrap(),
         v8::Function::new(scope, kstd::is_nix).unwrap()
+    ));
+    funcs.push((
+        v8::String::new(scope, "copy",).unwrap(),
+        v8::Function::new(scope, kfs::copy).unwrap()
     ));
     let global_std_obj = v8::Object::new(scope);
     for funcs in funcs {

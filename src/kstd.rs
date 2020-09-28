@@ -58,7 +58,7 @@ pub fn assert(
         }
     }
 }
-pub fn is_nix(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,mut ret: v8::ReturnValue,){
+pub fn is_nix(scope: &mut v8::HandleScope, _args: v8::FunctionCallbackArguments,mut ret: v8::ReturnValue,){
     if cfg!(windows){
         ret.set(v8::Boolean::new(scope, false).into());
     }else{
