@@ -163,12 +163,14 @@ pub fn compile_module<'a>(
 }
 fn get_cache_path(r: &str) -> std::path::PathBuf{
     if cfg!(windows){
+        let r2 = r.replace("/", "\\").replace("https:\\\\", "");
         let mut p = std::path::PathBuf::new();
         // p.push(std::path::Path::)
         p.push(std::env::current_dir().unwrap());
+        p.push(".cache");
         p.push("novel");
         p.push("pkgs");
-        p.push(r);
+        p.push(r2);
         p
     }else{
         let mut p = std::path::PathBuf::new();
@@ -218,6 +220,7 @@ pub fn resolver<'a>(
             let last = r.split('/').last().unwrap();
             let r_without_last = r.replace(last, "");
             // println!("last =  {} r without lsat = {}", &last, &r_without_last);
+            println!("{}", get_cache_path(&r_without_last).as_os_str().to_str().unwrap());
             let p2 = get_cache_path(&r_without_last);
             std::fs::create_dir_all(p2).unwrap();
             std::fs::write(p, &src).unwrap();
