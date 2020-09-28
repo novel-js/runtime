@@ -13,7 +13,7 @@ lazy_static! {
 lazy_static! {
     static ref INIT_LOCK: std::sync::Mutex<u32> = std::sync::Mutex::new(0);
 }
-fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str){
+fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str) {
     let exc = tc.exception().unwrap();
     let msg = v8::Exception::create_message(tc, exc);
 
@@ -21,7 +21,7 @@ fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str){
     let end = msg.get_end_column();
     let overlaping = start..end;
     let mut overlapping_chars: Vec<u8> = vec![];
-    for i in overlaping{
+    for i in overlaping {
         let src_line = msg.get_source_line(tc).unwrap().to_rust_string_lossy(tc);
         let c = src_line.chars().nth(i).unwrap();
         overlapping_chars.push(c as u8);
@@ -34,14 +34,25 @@ fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str){
     cols.resize(msg.get_start_column(), b' ');
     cols.resize(msg.get_end_column(), b'^');
 
-    println!("
+    println!(
+        "
   =>File {}
   =>Line {}
       {}
       {} {} error: {}
 
-    ", msg.get_script_resource_name(tc).unwrap().to_string(tc).unwrap().to_rust_string_lossy(tc),
-msg.get_line_number(tc).unwrap() as i32, new_src_line,String::from_utf8(cols).unwrap().bold().bright_yellow(), mode.bright_cyan(), tc.message().unwrap().get(tc).to_rust_string_lossy(tc));
+    ",
+        msg.get_script_resource_name(tc)
+            .unwrap()
+            .to_string(tc)
+            .unwrap()
+            .to_rust_string_lossy(tc),
+        msg.get_line_number(tc).unwrap() as i32,
+        new_src_line,
+        String::from_utf8(cols).unwrap().bold().bright_yellow(),
+        mode.bright_cyan(),
+        tc.message().unwrap().get(tc).to_rust_string_lossy(tc)
+    );
     // Filename, Line number, new_src_line, arrows, mode, error text
 }
 
@@ -220,10 +231,17 @@ pub fn resolver<'a>(
                 .get(&referrer.get_identity_hash())
             {
                 Some(s) => {
-                    println!("Pulling dependency... GET {} for {}", &r.bright_yellow(), s.bright_cyan());
+                    println!(
+                        "Pulling dependency... GET {} for {}",
+                        &r.bright_yellow(),
+                        s.bright_cyan()
+                    );
                 }
                 None => {
-                    println!("Pulling dependency... GET {} for an unknown dependency", &r.bright_yellow());
+                    println!(
+                        "Pulling dependency... GET {} for an unknown dependency",
+                        &r.bright_yellow()
+                    );
                 }
             }
 
@@ -356,9 +374,7 @@ fn main() {
         Some(_) => {}
         None => {
             if tc.has_caught() {
-                if tc.has_caught() {
-                    pretty_print_error(tc, "Runtime");
-                }
+                pretty_print_error(tc, "Runtime");
             }
         }
     }
