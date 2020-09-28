@@ -1,31 +1,67 @@
-import {println} from "https://novel-js.github.io/pkgs/std/std/println.js";
-/// <reference path="./" />
-import std from "https://novel-js.github.io/pkgs/std/std/dist.js";
-// import test from "https://novel-js.github.io/pkgs/std/testing/dist.js";
+import std from 'https://novel-js.github.io/pkgs/std/std/dist.js'
 
-(async function(){
-    // synx err;
-    // const a = 5;
-    // let a =  b;
-    std.file.write("test.txt", "test file")
-    std.file.append("test.txt", "A new line!");
-    // std.file.exists("test.txt").then(exi => {
-    //     std.print(exi)
-    // })
-    let exi = await std.file.exists("test.txt");
-    std.println(exi)
-    let a = {
-        a: "Letter a",
+
+class Option {
+  constructor (inner) {
+    this.inner = inner
+    this.isSome = false
+    this.isNone = false
+  }
+
+  isSome () {
+    return this.isSome
+  }
+
+  isNone () {
+    return this.isNone
+  }
+}
+class None extends Option {
+  constructor () {
+    super(null)
+    this.is_none = true
+  }
+
+  match (obj) {
+    obj.none()
+  }
+
+  unwrap () {
+    throw new Error('Could not unwrap() on a None() value')
+  }
+  // match(...x) {
+  //   super().match(...x)
+  // }
+}
+class Some extends Option {
+  constructor (inner) {
+    super(inner)
+    this.is_some = true
+  }
+
+  match (obj) {
+    obj.some(this.inner)
+  }
+
+  unwrap () {
+    return this.inner
+  }
+}
+const something = new Some(2)
+// const a = 6
+// let something
+// if (a === 6) {
+//   something = new Some(16)
+// } else {
+//   something = new None()
+// }
+something.match(
+  {
+    some: function (s) {
+      std.println('Something is some with variable s', s)
+    },
+    none: function () {
+      std.println('Something is none with no variagble')
     }
-    let b = {
-        "c": a
-    }
-    std.println(b)
-    std.file.write("/test.txt", "test").then(c => {
-        std.println(c)
-    }).catch(e => {
-        std.println("err", e)
-    })
-    std.println(5/0)
-})()
-// import { print } from "../pkgs/buckets/std/projects/std/dist";
+  }
+)
