@@ -209,7 +209,7 @@ fn get_cache_path(r: &str) -> std::path::PathBuf {
         p
     }
 }
-fn get_cache_path_for_clearing() -> std::path::PathBuf{
+fn get_cache_path_for_clearing() -> std::path::PathBuf {
     return std::path::PathBuf::from(".cache/novel");
 }
 pub fn resolver<'a>(
@@ -392,9 +392,9 @@ fn main() {
         .help("Runs the novel.js runtime on FILE, retaining original working directory.")
         .takes_value(true);
     let clean = Arg::with_name("clean")
-    .short("c")
-    .long("clean")
-    .help("Clears the cache. Like `rm .cache -r`.");
+        .short("c")
+        .long("clean")
+        .help("Clears the cache. Like `rm .cache -r`.");
 
     let matches = App::new("Novel CLI")
         .version("1.0")
@@ -403,26 +403,23 @@ fn main() {
         .arg(run)
         .arg(clean)
         .get_matches();
-
+    if matches.is_present("clean") {
+        match std::fs::remove_dir_all(get_cache_path_for_clearing()) {
+            Ok(s) => {
+                println!("{} {:?}", "Cleared .cache/novel!".green(), s);
+            }
+            Err(e) => println!(
+                "Error occured while clearing cache, {}",
+                e.to_string().red().bold().underline().italic()
+            ),
+        };
+    }
     match matches.value_of("run") {
         Some(inpf) => {
             println!("Got command run with inpf {}", inpf);
             let p = std::path::PathBuf::from(inpf);
             run_file(p);
-
-        }
-        None => {}
-    }
-    match matches.value_of("clean"){
-        Some(x) => {
-            match std::fs::remove_dir_all(get_cache_path_for_clearing()){
-                Ok(()) => {
-                    println!("{}", "Cleared .cache/novel!".green());
-                }
-                Err(e) => {
-                    println!("Error occured while clearing cache, {}", e.to_string().red().bold().underline().italic())
-                }
-            };
+            return;
         }
         None => {}
     }
