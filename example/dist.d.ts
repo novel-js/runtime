@@ -1,0 +1,5 @@
+namespace std{
+    function println(){
+        
+    }
+}
