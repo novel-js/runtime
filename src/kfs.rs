@@ -48,6 +48,27 @@ pub fn write(
     }
     ret.set(v8::undefined(scope).into());
 }
+pub fn delete(
+    scope: &mut v8::HandleScope,
+    args: v8::FunctionCallbackArguments,
+    mut ret: v8::ReturnValue,
+) {
+    let file_name = args
+        .get(0)
+        .to_string(scope)
+        .unwrap()
+        .to_rust_string_lossy(scope);
+
+    match std::fs::remove_file(file_name) {
+        Ok(_) => {
+            ret.set(v8::undefined(scope).into());
+        }
+        Err(e) => {
+            let msg = v8::String::new(scope, &e.to_string()).unwrap();
+            scope.throw_exception(msg.into());
+        }
+    }
+}
 pub fn append(
     scope: &mut v8::HandleScope,
     args: v8::FunctionCallbackArguments,
