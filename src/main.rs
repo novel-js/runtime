@@ -313,5 +313,5 @@ fn main() {
         String::from_utf8(code_input).unwrap(),
         p.to_str().unwrap().into(),
     );
-    module.unwrap().evaluate(scope).unwrap();
+    
 }
