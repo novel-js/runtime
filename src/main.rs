@@ -63,6 +63,10 @@ pub fn compile_module<'a>(
         v8::Function::new(scope, kfs::write).unwrap(),
     ));
     funcs.push((
+        v8::String::new(scope, "fs_delete").unwrap(),
+        v8::Function::new(scope, kfs::delete).unwrap(),
+    ));
+    funcs.push((
         v8::String::new(scope, "fs_append").unwrap(),
         v8::Function::new(scope, kfs::append).unwrap(),
     ));
