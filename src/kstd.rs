@@ -9,7 +9,7 @@ fn core_print(
 
     for i in 0..func_callback_args.length() {
         let arg = func_callback_args.get(i);
-        if arg.is_object() {
+        if arg.is_object() && !arg.is_function(){
             let a_obj = arg.to_object(scope).unwrap().into();
             if let Some(stringified) = v8::json::stringify(scope, a_obj) {
                 acc.push(stringified.to_rust_string_lossy(scope))
