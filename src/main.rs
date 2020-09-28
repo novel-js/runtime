@@ -74,7 +74,10 @@ pub fn compile_module<'a>(
         v8::String::new(scope, "tassert").unwrap(),
         v8::Function::new(scope, kstd::assert_or_panic).unwrap()
     ));
-
+    funcs.push((
+        v8::String::new(scope, "is_nix",).unwrap(),
+        v8::Function::new(scope, kstd::is_nix).unwrap()
+    ));
     let global_std_obj = v8::Object::new(scope);
     for funcs in funcs {
         global_std_obj

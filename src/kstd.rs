@@ -58,7 +58,14 @@ pub fn assert(
         }
     }
 }
-pub fn assert_or_panic(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
+pub fn is_nix(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,mut ret: v8::ReturnValue,){
+    if cfg!(windows){
+        ret.set(v8::Boolean::new(scope, false).into());
+    }else{
+        ret.set(v8::Boolean::new(scope, true).into());
+    }
+}
+    pub fn assert_or_panic(scope: &mut v8::HandleScope,args: v8::FunctionCallbackArguments,_ret: v8::ReturnValue,){
 // if args.get(0) == v8::Boolean::new(scope, false){
 // if args.length() >= 2{ //Todo, find out why this needs to be 2.
 //     // assert()

@@ -108,3 +108,10 @@ pub fn append(
         }
     }
 }
+pub fn copy(
+    scope: &mut v8::HandleScope,
+    args: v8::FunctionCallbackArguments,
+    mut ret: v8::ReturnValue,
+) {
+    let source = args.get(0).to_string(scope);
+}
