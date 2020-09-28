@@ -322,6 +322,7 @@ fn read_write_test() {
     );
     let tc = &mut v8::TryCatch::new(scope);
     module.unwrap().evaluate(tc).unwrap();
+    std::fs::remove_file("read_write_test.txt").unwrap(); // Cleanup
     assert_eq!(tc.has_caught(), false);
 
     //  assert!(module.is_none());
