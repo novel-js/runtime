@@ -22,6 +22,17 @@ std
   - Check `assertion == true`, if its not, print `message`. 
 
 
+Cli ideas
+===
+novel run \<file\>
+
+novel clean
+  - Clears cache, so on next `run`, all packages are refetched
+
+novel help
+
+
+
 
 std.file ✖ ✔
 ====
@@ -35,5 +46,14 @@ std.file ✖ ✔
 |  ✖           | copy   | source, destinatioon |  Promise |
 |  ✖           | mkdir   | pathname, recursive? |  Promise |
 |  ✖           | rename/move   | oldName, newName |  Promise |
+
+
+std.http
+========
+| Status       | Function name    | Args     | Returns  |
+| -------------: | -----------: | :---------- | :---: |
+|  ✖             | get   | url, options           | Promise\<Response\> |
+|  ✖             | post   | url, options           | Promise\<Response\> |
+|  ✖             | put   | url, options           | Promise\<Response\> |
 
 - Maybe a http library at some point?

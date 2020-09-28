@@ -1,6 +1,8 @@
 use rusty_v8 as v8;
 #[macro_use]
 extern crate lazy_static;
+extern crate clap;
+use clap::{App, Arg, SubCommand};
 mod kfs;
 mod kstd;
 use colored::*;
@@ -207,6 +209,9 @@ fn get_cache_path(r: &str) -> std::path::PathBuf {
         p
     }
 }
+fn get_cache_path_for_clearing() -> std::path::PathBuf{
+    return std::path::PathBuf::from(".cache/novel");
+}
 pub fn resolver<'a>(
     context: v8::Local<'a, v8::Context>,
     specifier: v8::Local<'a, v8::String>,
@@ -345,7 +350,7 @@ fn read_write_test() {
 
     //  assert!(module.is_none());
 }
-fn main() {
+fn run_file(path: std::path::PathBuf) {
     // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
     let platform = v8::new_default_platform().unwrap();
     v8::V8::initialize_platform(platform);
@@ -359,13 +364,13 @@ fn main() {
     let context = v8::Context::new(scope);
     let scope = &mut v8::ContextScope::new(scope, context);
     //TODO: Support different file names
-    let p: std::path::PathBuf = ["example", "in.js"].iter().collect();
-    let code_input = std::fs::read(&p).unwrap();
+    // let p: std::path::PathBuf = ["example", "in.js"].iter().collect();
+    let code_input = std::fs::read(&path).unwrap();
     // println!("example/in.js = {}", std::str::from_utf8(&code_input).unwrap());
     let module = compile_module(
         scope,
         String::from_utf8(code_input).unwrap(),
-        p.to_str().unwrap().into(),
+        path.to_str().unwrap().into(),
     );
     let tc = &mut v8::TryCatch::new(scope);
 
@@ -377,5 +382,48 @@ fn main() {
                 pretty_print_error(tc, "Runtime");
             }
         }
+    }
+}
+fn main() {
+    let run = Arg::with_name("run")
+        .short("r")
+        .long("run")
+        .value_name("FILE")
+        .help("Runs the novel.js runtime on FILE, retaining original working directory.")
+        .takes_value(true);
+    let clean = Arg::with_name("clean")
+    .short("c")
+    .long("clean")
+    .help("Clears the cache. Like `rm .cache -r`.");
+
+    let matches = App::new("Novel CLI")
+        .version("1.0")
+        .author("by Rusty Shackleford")
+        .about("CLI To interact with Noveljs")
+        .arg(run)
+        .arg(clean)
+        .get_matches();
+
+    match matches.value_of("run") {
+        Some(inpf) => {
+            println!("Got command run with inpf {}", inpf);
+            let p = std::path::PathBuf::from(inpf);
+            run_file(p);
+
+        }
+        None => {}
+    }
+    match matches.value_of("clean"){
+        Some(x) => {
+            match std::fs::remove_dir_all(get_cache_path_for_clearing()){
+                Ok(()) => {
+                    println!("{}", "Cleared .cache/novel!".green());
+                }
+                Err(e) => {
+                    println!("Error occured while clearing cache, {}", e.to_string().red().bold().underline().italic())
+                }
+            };
+        }
+        None => {}
     }
 }
