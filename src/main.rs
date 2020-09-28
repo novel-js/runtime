@@ -13,35 +13,38 @@ lazy_static! {
 lazy_static! {
     static ref INIT_LOCK: std::sync::Mutex<u32> = std::sync::Mutex::new(0);
 }
-fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str) {
-    let teu = tc.exception().unwrap();
-    let msg = v8::Exception::create_message(tc, teu);
-    let name = msg.get_script_resource_name(tc).unwrap();
-    let line = msg.get_source_line(tc).unwrap();
-    let line_indicator = format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
-    let line_offset = vec![b' '; line_indicator.len()];
-    print!(
-        "\n\nFile {}\n{}{}\n{}",
-        name.to_string(tc).unwrap().to_rust_string_lossy(tc),
-        String::from_utf8(line_offset).unwrap(),
-        line.to_rust_string_lossy(tc).bright_white().bold(),
-        line_indicator,
-    );
+fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str){
+    let exc = tc.exception().unwrap();
+    let msg = v8::Exception::create_message(tc, exc);
+
+    let start = msg.get_start_column();
+    let end = msg.get_end_column();
+    let overlaping = start..end;
+    let mut overlapping_chars: Vec<u8> = vec![];
+    for i in overlaping{
+        let src_line = msg.get_source_line(tc).unwrap().to_rust_string_lossy(tc);
+        let c = src_line.chars().nth(i).unwrap();
+        overlapping_chars.push(c as u8);
+    }
+    let overlapping_str = String::from_utf8(overlapping_chars).unwrap();
+    let overalpping_str_fmt = overlapping_str.red().underline().bold().to_string();
+    let old_src_line = msg.get_source_line(tc).unwrap().to_rust_string_lossy(tc);
+    let new_src_line = old_src_line.replace(&overlapping_str, &overalpping_str_fmt);
     let mut cols: Vec<u8> = vec![];
-    // cols.resize(line_indicator.len(), b'%');
     cols.resize(msg.get_start_column(), b' ');
     cols.resize(msg.get_end_column(), b'^');
-    println!(
-        "{} {}: {}\n\n",
-        // String::from_utf8(line_offset).unwrap(),
-        String::from_utf8(cols).unwrap().bold().bright_yellow(),
-        mode.bright_green(),
-        tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
-    );
 
-    tc.rethrow();
-    tc.reset();
+    println!("
+  =>File {}
+  =>Line {}
+      {}
+      {} {} error: {}
+
+    ", msg.get_script_resource_name(tc).unwrap().to_string(tc).unwrap().to_rust_string_lossy(tc),
+msg.get_line_number(tc).unwrap() as i32, new_src_line,String::from_utf8(cols).unwrap().bold().bright_yellow(), mode.bright_cyan(), tc.message().unwrap().get(tc).to_rust_string_lossy(tc));
+    // Filename, Line number, new_src_line, arrows, mode, error text
 }
+
 #[must_use]
 struct SetupGuard {}
 
@@ -167,7 +170,7 @@ pub fn compile_module<'a>(
         }
         None => {
             if tc.has_caught() {
-                pretty_print_error(tc, "Compiling");
+                test_print_error(tc, "Compiling");
             }
             None
         }
@@ -217,10 +220,10 @@ pub fn resolver<'a>(
                 .get(&referrer.get_identity_hash())
             {
                 Some(s) => {
-                    println!("Pulling dependency... GET {} for {}", &r, s);
+                    println!("Pulling dependency... GET {} for {}", &r.bright_yellow(), s.bright_cyan());
                 }
                 None => {
-                    println!("Pulling dependency... GET {} for an unknown dependency", &r);
+                    println!("Pulling dependency... GET {} for an unknown dependency", &r.bright_yellow());
                 }
             }
 
@@ -232,13 +235,6 @@ pub fn resolver<'a>(
             let last = r.split('/').last().unwrap();
             let r_without_last = r.replace(last, "");
             // println!("last =  {} r without lsat = {}", &last, &r_without_last);
-            println!(
-                "{}",
-                get_cache_path(&r_without_last)
-                    .as_os_str()
-                    .to_str()
-                    .unwrap()
-            );
             let p2 = get_cache_path(&r_without_last);
             std::fs::create_dir_all(p2).unwrap();
             std::fs::write(p, &src).unwrap();
@@ -360,7 +356,7 @@ fn main() {
         None => {
             if tc.has_caught() {
                 if tc.has_caught() {
-                    pretty_print_error(tc, "Runtime");
+                    test_print_error(tc, "Runtime");
                 }
             }
         }
