@@ -22,15 +22,16 @@ std
   - Check `assertion == true`, if its not, print `message`. 
 
 
-Cli ideas
-===
+Cli
+======
 novel run \<file\>
+  - Run \<file\> with the novel runtime.
 
 novel clean
   - Clears cache, so on next `run`, all packages are refetched
 
 novel help
-
+  - Prints a help menu
 
 
 
