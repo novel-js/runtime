@@ -170,7 +170,7 @@ pub fn compile_module<'a>(
         }
         None => {
             if tc.has_caught() {
-                test_print_error(tc, "Compiling");
+                pretty_print_error(tc, "Compiling");
             }
             None
         }
