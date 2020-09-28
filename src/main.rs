@@ -356,7 +356,7 @@ fn main() {
         None => {
             if tc.has_caught() {
                 if tc.has_caught() {
-                    test_print_error(tc, "Runtime");
+                    pretty_print_error(tc, "Runtime");
                 }
             }
         }
