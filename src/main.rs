@@ -291,6 +291,28 @@ fn fails_to_compile(){
     );
     assert!(module.is_none());
  }
+ #[test]
+ fn read_write_test(){
+     let _setup_guard = setup();
+ 
+     let isolate = &mut v8::Isolate::new(Default::default());
+     let scope = &mut v8::HandleScope::new(isolate);
+     let context = v8::Context::new(scope);
+     let scope = &mut v8::ContextScope::new(scope, context);
+     let p: std::path::PathBuf = ["tests", "read_write.js"].iter().collect();
+ 
+     let code_input = std::fs::read(&p).unwrap();
+     let module = compile_module(
+         scope,
+         String::from_utf8(code_input).unwrap(),
+         p.to_str().unwrap().into(),
+     );
+     let tc = &mut v8::TryCatch::new(scope);
+     module.unwrap().evaluate(tc).unwrap();
+     assert_eq!(tc.has_caught(), false);
+
+    //  assert!(module.is_none());
+  }
 fn main() {
     // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
     let platform = v8::new_default_platform().unwrap();
