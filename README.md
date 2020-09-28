@@ -23,15 +23,17 @@ std
 
 
 
-std.file
+std.file ✖ ✔
 ====
 | Status       | Function name    | Args     | Returns  |
-| :------------- | :----------: | :----------: | :---: |
-|  ✔             | read   | filename           | Promise\<String\> |
-|  ✔             | write   | filename, content |  undefined |
-|  ✔            | append   | filename, content |  undefined |
-|  ✔           | exists   | filename |  Promise<boolean> |
+| -------------: | -----------: | :---------- | :---: |
+|  ✔             | read   | filePath           | Promise\<String\> |
+|  ✔             | write   | filePath, content |  undefined |
+|  ✔            | append   | filePath, content |  undefined |
+|  ✔           | exists   | filePath |  Promise<boolean> |
+|  ✔           | delete   | filePath |  undefined |
+|  ✖           | copy   | source, destinatioon |  Promise |
+|  ✖           | mkdir   | pathname, recursive? |  Promise |
+|  ✖           | rename/move   | oldName, newName |  Promise |
 
-std.http
-========
-- I dont have many plans for http, But soon I want a basic `get` function.
+- Maybe a http library at some point?
