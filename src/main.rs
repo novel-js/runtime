@@ -12,25 +12,53 @@ lazy_static! {
 //stolen directly from the rusty_v8 tests.rs
 lazy_static! {
     static ref INIT_LOCK: std::sync::Mutex<u32> = std::sync::Mutex::new(0);
-  }
+}
+fn pretty_print_error(tc: &mut v8::TryCatch<v8::HandleScope>, mode: &str) {
+    let teu = tc.exception().unwrap();
+    let msg = v8::Exception::create_message(tc, teu);
+    let name = msg.get_script_resource_name(tc).unwrap();
+    let line = msg.get_source_line(tc).unwrap();
+    let line_indicator = format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
+    let line_offset = vec![b' '; line_indicator.len()];
+    print!(
+        "\n\nFile {}\n{}{}\n{}",
+        name.to_string(tc).unwrap().to_rust_string_lossy(tc),
+        String::from_utf8(line_offset).unwrap(),
+        line.to_rust_string_lossy(tc).bright_white().bold(),
+        line_indicator,
+    );
+    let mut cols: Vec<u8> = vec![];
+    // cols.resize(line_indicator.len(), b'%');
+    cols.resize(msg.get_start_column(), b' ');
+    cols.resize(msg.get_end_column(), b'^');
+    println!(
+        "{} {}: {}\n\n",
+        // String::from_utf8(line_offset).unwrap(),
+        String::from_utf8(cols).unwrap().bold().bright_yellow(),
+        mode.bright_green(),
+        tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
+    );
 
+    tc.rethrow();
+    tc.reset();
+}
 #[must_use]
 struct SetupGuard {}
 
 impl Drop for SetupGuard {
-  fn drop(&mut self) {
-    // TODO shutdown process cleanly.
-  }
+    fn drop(&mut self) {
+        // TODO shutdown process cleanly.
+    }
 }
 #[cfg(test)]
 fn setup() -> SetupGuard {
-  let mut g = INIT_LOCK.lock().unwrap();
-  *g += 1;
-  if *g == 1 {
-    v8::V8::initialize_platform(v8::new_default_platform().unwrap());
-    v8::V8::initialize();
-  }
-  SetupGuard {}
+    let mut g = INIT_LOCK.lock().unwrap();
+    *g += 1;
+    if *g == 1 {
+        v8::V8::initialize_platform(v8::new_default_platform().unwrap());
+        v8::V8::initialize();
+    }
+    SetupGuard {}
 }
 
 pub fn compile_module<'a>(
@@ -71,15 +99,15 @@ pub fn compile_module<'a>(
     ));
     funcs.push((
         v8::String::new(scope, "tassert").unwrap(),
-        v8::Function::new(scope, kstd::assert_or_panic).unwrap()
+        v8::Function::new(scope, kstd::assert_or_panic).unwrap(),
     ));
     funcs.push((
-        v8::String::new(scope, "is_nix",).unwrap(),
-        v8::Function::new(scope, kstd::is_nix).unwrap()
+        v8::String::new(scope, "is_nix").unwrap(),
+        v8::Function::new(scope, kstd::is_nix).unwrap(),
     ));
     funcs.push((
-        v8::String::new(scope, "copy",).unwrap(),
-        v8::Function::new(scope, kfs::copy).unwrap()
+        v8::String::new(scope, "copy").unwrap(),
+        v8::Function::new(scope, kfs::copy).unwrap(),
     ));
     let global_std_obj = v8::Object::new(scope);
     for funcs in funcs {
@@ -128,51 +156,25 @@ pub fn compile_module<'a>(
             let im = m.instantiate_module(tc, resolver);
             if im.is_none() {
                 println!("[Warning] Module {} failed to be instantiated.", name);
-                return None
+                return None;
             }
 
             // println!("compile_module: is_none: {} name: {} src {}", im.is_none(),name, code);
             //TODO: figure out if this should stay
             // let _result = module.evaluate(scope).unwrap();
+
             Some(m)
         }
         None => {
             if tc.has_caught() {
-                let teu = tc.exception().unwrap();
-                let msg = v8::Exception::create_message(tc, teu);
-                let name = msg.get_script_resource_name(tc).unwrap();
-                let line = msg.get_source_line(tc).unwrap();
-                let line_indicator =
-                    format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
-                let line_offset = vec![b' '; line_indicator.len()];
-                print!(
-                    "\n\nFile {}\n{}{}\n{}",
-                    name.to_string(tc).unwrap().to_rust_string_lossy(tc),
-                    String::from_utf8(line_offset).unwrap(),
-                    line.to_rust_string_lossy(tc).bright_white().bold(),
-                    line_indicator,
-                );
-                let mut cols: Vec<u8> = vec![];
-                // cols.resize(line_indicator.len(), b'%');
-                cols.resize(msg.get_start_column(), b' ');
-                cols.resize(msg.get_end_column(), b'^');
-                println!(
-                    "{} {}: {}\n\n",
-                    // String::from_utf8(line_offset).unwrap(),
-                    String::from_utf8(cols).unwrap().bold().bright_yellow(),
-                    "".bright_green(),
-                    tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
-                );
+                pretty_print_error(tc, "Compiling");
             }
-            tc.rethrow();
-            tc.reset();
             None
         }
-        
     }
 }
-fn get_cache_path(r: &str) -> std::path::PathBuf{
-    if cfg!(windows){
+fn get_cache_path(r: &str) -> std::path::PathBuf {
+    if cfg!(windows) {
         let r2 = r.replace("/", "\\").replace("https:\\\\", "");
         let mut p = std::path::PathBuf::new();
         // p.push(std::path::Path::)
@@ -182,7 +184,7 @@ fn get_cache_path(r: &str) -> std::path::PathBuf{
         p.push("pkgs");
         p.push(r2);
         p
-    }else{
+    } else {
         let mut p = std::path::PathBuf::new();
         p.push(".cache");
         p.push("novel");
@@ -230,7 +232,13 @@ pub fn resolver<'a>(
             let last = r.split('/').last().unwrap();
             let r_without_last = r.replace(last, "");
             // println!("last =  {} r without lsat = {}", &last, &r_without_last);
-            println!("{}", get_cache_path(&r_without_last).as_os_str().to_str().unwrap());
+            println!(
+                "{}",
+                get_cache_path(&r_without_last)
+                    .as_os_str()
+                    .to_str()
+                    .unwrap()
+            );
             let p2 = get_cache_path(&r_without_last);
             std::fs::create_dir_all(p2).unwrap();
             std::fs::write(p, &src).unwrap();
@@ -244,9 +252,8 @@ pub fn resolver<'a>(
     }
 }
 
-
 #[test]
-fn math_test(){
+fn math_test() {
     let _setup_guard = setup();
     let isolate = &mut v8::Isolate::new(Default::default());
     let scope = &mut v8::HandleScope::new(isolate);
@@ -266,7 +273,7 @@ fn math_test(){
     assert_eq!(tc.has_caught(), false);
 }
 #[test]
-fn non_existent_function(){
+fn non_existent_function() {
     let _setup_guard = setup();
 
     let isolate = &mut v8::Isolate::new(Default::default());
@@ -282,9 +289,9 @@ fn non_existent_function(){
         p.to_str().unwrap().into(),
     );
     assert!(module.is_none());
- }
- #[test]
-fn fails_to_compile(){
+}
+#[test]
+fn fails_to_compile() {
     let _setup_guard = setup();
 
     let isolate = &mut v8::Isolate::new(Default::default());
@@ -300,29 +307,29 @@ fn fails_to_compile(){
         p.to_str().unwrap().into(),
     );
     assert!(module.is_none());
- }
- #[test]
- fn read_write_test(){
-     let _setup_guard = setup();
- 
-     let isolate = &mut v8::Isolate::new(Default::default());
-     let scope = &mut v8::HandleScope::new(isolate);
-     let context = v8::Context::new(scope);
-     let scope = &mut v8::ContextScope::new(scope, context);
-     let p: std::path::PathBuf = ["tests", "read_write.js"].iter().collect();
- 
-     let code_input = std::fs::read(&p).unwrap();
-     let module = compile_module(
-         scope,
-         String::from_utf8(code_input).unwrap(),
-         p.to_str().unwrap().into(),
-     );
-     let tc = &mut v8::TryCatch::new(scope);
-     module.unwrap().evaluate(tc).unwrap();
-     assert_eq!(tc.has_caught(), false);
+}
+#[test]
+fn read_write_test() {
+    let _setup_guard = setup();
+
+    let isolate = &mut v8::Isolate::new(Default::default());
+    let scope = &mut v8::HandleScope::new(isolate);
+    let context = v8::Context::new(scope);
+    let scope = &mut v8::ContextScope::new(scope, context);
+    let p: std::path::PathBuf = ["tests", "read_write.js"].iter().collect();
+
+    let code_input = std::fs::read(&p).unwrap();
+    let module = compile_module(
+        scope,
+        String::from_utf8(code_input).unwrap(),
+        p.to_str().unwrap().into(),
+    );
+    let tc = &mut v8::TryCatch::new(scope);
+    module.unwrap().evaluate(tc).unwrap();
+    assert_eq!(tc.has_caught(), false);
 
     //  assert!(module.is_none());
-  }
+}
 fn main() {
     // let mut module_map: std::collections::hash_map::HashMap<v8::Module, String> = std::collections::hash_map::HashMap::new();
     let platform = v8::new_default_platform().unwrap();
@@ -346,42 +353,16 @@ fn main() {
         p.to_str().unwrap().into(),
     );
     let tc = &mut v8::TryCatch::new(scope);
-    
-    let evaluated = module.unwrap().evaluate(tc);
-    match evaluated{
-        Some(m) => {
 
-        }
+    let evaluated = module.unwrap().evaluate(tc);
+    match evaluated {
+        Some(_) => {}
         None => {
             if tc.has_caught() {
-                let teu = tc.exception().unwrap();
-                let msg = v8::Exception::create_message(tc, teu);
-                let name = msg.get_script_resource_name(tc).unwrap();
-                let line = msg.get_source_line(tc).unwrap();
-                let line_indicator =
-                    format!("Line {}", (msg.get_line_number(tc).unwrap() as i32)).green();
-                let line_offset = vec![b' '; line_indicator.len()];
-                print!(
-                    "\n\nFile {}\n{}{}\n{}",
-                    name.to_string(tc).unwrap().to_rust_string_lossy(tc),
-                    String::from_utf8(line_offset).unwrap(),
-                    line.to_rust_string_lossy(tc).bright_white().bold(),
-                    line_indicator,
-                );
-                let mut cols: Vec<u8> = vec![];
-                // cols.resize(line_indicator.len(), b'%');
-                cols.resize(msg.get_start_column(), b' ');
-                cols.resize(msg.get_end_column(), b'^');
-                println!(
-                    "{} {}: {}\n\n",
-                    // String::from_utf8(line_offset).unwrap(),
-                    String::from_utf8(cols).unwrap().bold().bright_yellow(),
-                    "".bright_green(),
-                    tc.message().unwrap().get(tc).to_rust_string_lossy(tc).red()
-                );
+                if tc.has_caught() {
+                    pretty_print_error(tc, "Runtime");
+                }
             }
-            tc.rethrow();
-            tc.reset();
         }
     }
 }

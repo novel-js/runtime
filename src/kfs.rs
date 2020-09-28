@@ -109,10 +109,13 @@ pub fn append(
     }
 }
 pub fn copy(
-    scope: &mut v8::HandleScope,
-    args: v8::FunctionCallbackArguments,
+    _scope: &mut v8::HandleScope,
+    _args: v8::FunctionCallbackArguments,
     _ret: v8::ReturnValue,
 ) {
+
+    // std::fs::copy(from, to);
+
     // let source = args.get(0).to_string(scope);
 //TODO
 }
